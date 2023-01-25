@@ -45,20 +45,24 @@ local function get_can_loaded_ws(path)
   return can_loaded_ws_name, can_loaded_ws_path
 end
 
+local function build_record_file(ws_dir, ws_name)
+  local record_name = "buf#" .. ws_name
+  local record_file = utils.fs_concat({ ws_dir, record_name })
+  return record_file
+end
+
 -- 获取path路径的记录文件，如果path路径没有相应工作空间则返回nil
 local function get_record_file(ws_dir, path)
   local can_loaded_ws_name, _ = get_can_loaded_ws(path)
   if can_loaded_ws_name == nil then
     return
   end
-  local record_name = "buf#" .. can_loaded_ws_name
-  local record_file = utils.fs_concat({ ws_dir, record_name })
-  return record_file
+  return build_record_file(ws_dir, can_loaded_ws_name), can_loaded_ws_name
 end
 
 -- 打开当前工作空间记录的缓冲区
 local function reload_ws_buf(ws_dir)
-  local record_file = get_record_file(ws_dir, vim.fn.getcwd())
+  local record_file, ws_name = get_record_file(ws_dir, vim.fn.getcwd())
   if record_file == nil or record_file == "" then
     return
   end
@@ -108,8 +112,17 @@ local function record_ws_buf(ws_dir)
   end
 end
 
+-- 删除记录缓存
+local function remove_ws_buf(ws_dir, name)
+  local record_file = build_record_file(ws_dir, name)
+  if utils.exists_file(record_file) then
+    os.remove(record_file)
+  end
+end
+
 return {
   reload_ws_buf = reload_ws_buf,
   auto_load_ws = auto_load_ws,
   record_ws_buf = record_ws_buf,
+  remove_ws_buf = remove_ws_buf,
 }

@@ -20,13 +20,28 @@ local function setup(config)
   utils.ensure_mkdir(ws_dir)
   config = vim.tbl_deep_extend("force", config, {
     path = utils.fs_concat({ ws_dir, "ws" }),
-    hooks = {
-      add = {},
-      open = {},
-    },
   })
-  table.insert(config.hooks.add, "lua require('workspaces-enhancer.enhancer').record_ws_buf('" ..  ws_dir .."')")
-  table.insert(config.hooks.open, "lua require('workspaces-enhancer.enhancer').reload_ws_buf('" ..  ws_dir .."')")
+  if not config.hooks then
+    config.hooks = {}
+  end
+  if not config.hooks.add then
+    config.hooks.add = {}
+  end
+  if not config.hooks.remove then
+    config.hooks.remove = {}
+  end
+  if not config.hooks.open then
+    config.hooks.open = {}
+  end
+  table.insert(config.hooks.add, function()
+    enhancer.record_ws_buf(ws_dir)
+  end)
+  table.insert(config.hooks.remove, function(name, _, _)
+    enhancer.remove_ws_buf(ws_dir, name)
+  end)
+  table.insert(config.hooks.open, function()
+    enhancer.reload_ws_buf(ws_dir)
+  end)
   ws.setup(config)
 
   vim.api.nvim_create_augroup("user_workspaces", { clear = true })
