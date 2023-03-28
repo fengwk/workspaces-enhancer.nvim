@@ -105,9 +105,9 @@ local function record_ws_buf(ws_dir)
   local ws_name, ws_path = get_can_loaded_ws(buf_path)
   if ws_name ~= nil and ws_path ~= nil then
     vim.api.nvim_command("cd " .. ws_path) -- 切换根目录
-    local t_ok, nvim_tree = pcall(require, "nvim-tree")
+    local t_ok, nvim_tree_api = pcall(require, "nvim-tree.api")
     if t_ok then
-      nvim_tree.change_dir(ws_path) -- 主动修改nvim-tree root，否则切换会出现问题
+      nvim_tree_api.tree.change_root(ws_path) -- 主动修改nvim-tree root，否则切换会出现问题
     end
   end
 end
