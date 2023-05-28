@@ -108,6 +108,11 @@ local function record_ws_buf(ws_dir)
     local t_ok, nvim_tree_api = pcall(require, "nvim-tree.api")
     if t_ok then
       nvim_tree_api.tree.change_root(ws_path) -- 主动修改nvim-tree root，否则切换会出现问题
+      -- 自动切换到nvim-tree聚焦到打开的文件
+      local ok_finders_find_file, finders_find_file = pcall(require, "nvim-tree.actions.finders.find-file")
+      if ok_finders_find_file then
+        finders_find_file.fn(buf_path)
+      end
     end
   end
 end
